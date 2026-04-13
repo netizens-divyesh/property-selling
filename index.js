@@ -22,10 +22,12 @@ app.use(express.static("public"));
 // routes
 const userRoutes = require("./routes/userRoutes");
 const propertyRoutes = require("./routes/propertyRoute");
+const settingsRoutes = require("./routes/settingsRoutes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT} 🚀`);
+  console.log(`Server running on port ${process.env.PORT} 🚀🚀🚀🚀🚀`);
 });
