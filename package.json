@@ -1,0 +1,35 @@
+{
+  "name": "property-selling",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "_moduleAliases": {
+    "@config": "config",
+    "@routes": "routes",
+    "@controllers": "controllers",
+    "@services": "services",
+    "@models": "models",
+    "@middleware": "middleware",
+    "@plugins": "plugins",
+    "@utils": "utils"
+  },
+  "keywords": [],
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "module-alias": "^2.3.4",
+    "mongoose": "^9.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

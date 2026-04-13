@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Property Management | PropertyHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family: "Outfit", sans-serif;
+        background: #f8fafc;
+      }
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      }
+      .property-card:hover .property-overlay {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <!-- Sidebar -->
+    <div
+      class="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white p-6 hidden lg:block z-50"
+    >
+      <div class="flex items-center gap-3 mb-10">
+        <div
+          class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20"
+        >
+          <i data-lucide="building-2" class="w-6 h-6"></i>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight">PropertyHub</h1>
+      </div>
+
+      <nav class="space-y-4">
+        <a
+          href="index.html"
+          class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"
+        >
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="font-medium">Users</span>
+        </a>
+        <a
+          href="properties.html"
+          class="flex items-center gap-3 px-4 py-3 bg-indigo-600 rounded-xl transition-all"
+        >
+          <i data-lucide="home" class="w-5 h-5"></i>
+          <span class="font-medium">Properties</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"
+        >
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span class="font-medium">Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-6 lg:p-10">
+      <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+      >
+        <div>
+          <h2 class="text-3xl font-bold text-slate-800">Property List</h2>
+          <p class="text-slate-500 mt-1">
+            Browse and manage your real estate listings
+          </p>
+        </div>
+        <div class="flex gap-3">
+            <button
+            onclick="fetchProperties()"
+            class="p-3 bg-white text-slate-500 hover:bg-slate-50 rounded-xl border border-slate-100 transition-all shadow-sm"
+            title="Refresh"
+            >
+            <i data-lucide="rotate-cw" class="w-5 h-5"></i>
+            </button>
+            <button
+            onclick="openPropertyModal()"
+            class="gradient-bg text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-indigo-500/20"
+            >
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            Add Property
+            </button>
+        </div>
+      </header>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+            <i data-lucide="home" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span class="text-sm text-slate-500 font-medium">Total Properties</span>
+            <h3 id="totalPropertiesCount" class="text-2xl font-bold text-slate-800">0</h3>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+            <i data-lucide="tag" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span class="text-sm text-slate-500 font-medium">Available</span>
+            <h3 id="availableCount" class="text-2xl font-bold text-slate-800">0</h3>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span class="text-sm text-slate-500 font-medium">Pending/Under Const</span>
+            <h3 id="pendingCount" class="text-2xl font-bold text-slate-800">0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Properties Grid -->
+      <div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <!-- Properties will be injected here -->
+      </div>
+
+      <div id="loader" class="flex flex-col items-center justify-center p-20 hidden">
+        <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="mt-4 text-slate-500 font-medium">Loading properties...</p>
+      </div>
+
+      <div id="emptyState" class="flex flex-col items-center justify-center p-20 hidden">
+        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-4">
+          <i data-lucide="building" class="w-10 h-10"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-800">No properties found</h3>
+        <p class="text-slate-500 mt-2">Add your first property listing to get started.</p>
+      </div>
+    </main>
+
+    <!-- Property Modal -->
+    <div id="propertyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-all">
+      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl transform scale-95 transition-all overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white z-10">
+          <div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-slate-800">Add New Property</h3>
+            <p class="text-slate-500 mt-1">Fill in the property details</p>
+          </div>
+          <button onclick="closePropertyModal()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 transition-all text-slate-400">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+
+        <form id="propertyForm" class="p-8 space-y-6">
+          <input type="hidden" id="propertyId" />
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Title</label>
+              <input type="text" id="pTitle" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="Luxury Villa with Pool" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Price ($)</label>
+              <input type="number" id="pPrice" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="500000" />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-slate-700 ml-1">Description</label>
+            <textarea id="pDescription" required rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="Describe the property details..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Location</label>
+              <input type="text" id="pLocation" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="Beverly Hills, CA" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Type</label>
+              <select id="pType" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+                <option value="land">Land</option>
+                <option value="commercial">Commercial</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Area (sq ft)</label>
+              <input type="number" id="pArea" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="2500" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-semibold text-slate-700 ml-1">Status</label>
+              <select id="pStatus" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                <option value="available">Available</option>
+                <option value="sold">Sold</option>
+                <option value="rented">Rented</option>
+                <option value="under_construction">Under Construction</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-slate-700 ml-1">Image URL</label>
+            <input type="text" id="pImage" required class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="https://images.unsplash.com/..." />
+          </div>
+
+          <div class="flex items-center gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+            <button type="button" onclick="closePropertyModal()" class="flex-1 px-6 py-4 bg-slate-100 text-slate-600 font-semibold rounded-2xl hover:bg-slate-200 transition-all">Cancel</button>
+            <button type="submit" class="flex-1 px-6 py-4 gradient-bg text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-indigo-500/20">Save Property</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- View Property Modal -->
+    <div id="viewPropertyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center opacity-0 pointer-events-none transition-all">
+      <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl transform scale-95 transition-all overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white z-10">
+          <div>
+            <h3 class="text-2xl font-bold text-slate-800">Property Details</h3>
+            <p class="text-slate-500 mt-1">Read-only preview of this listing</p>
+          </div>
+          <button onclick="closeViewPropertyModal()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 transition-all text-slate-400">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+
+        <div class="p-8 space-y-8">
+          <div class="relative overflow-hidden rounded-3xl bg-slate-100">
+            <img id="viewPropertyImage" src="" alt="Property preview" class="h-72 w-full object-cover" />
+            <div class="absolute left-5 top-5">
+              <span id="viewPropertyStatus" class="px-3 py-1 rounded-lg text-xs font-bold uppercase bg-slate-100 text-slate-700"></span>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h4 id="viewPropertyTitle" class="text-3xl font-bold text-slate-800"></h4>
+              <div class="mt-2 flex items-center gap-2 text-slate-500">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                <span id="viewPropertyLocation"></span>
+              </div>
+            </div>
+            <p id="viewPropertyPrice" class="text-2xl font-bold text-indigo-600"></p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Type</p>
+              <p id="viewPropertyType" class="mt-2 text-lg font-semibold text-slate-800"></p>
+            </div>
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Area</p>
+              <p id="viewPropertyArea" class="mt-2 text-lg font-semibold text-slate-800"></p>
+            </div>
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status</p>
+              <p id="viewPropertyStatusText" class="mt-2 text-lg font-semibold text-slate-800"></p>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-100 p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Description</p>
+            <p id="viewPropertyDescription" class="mt-3 leading-7 text-slate-600"></p>
+          </div>
+
+          <div class="sticky bottom-0 bg-white pt-2">
+            <button type="button" onclick="closeViewPropertyModal()" class="w-full px-6 py-4 bg-slate-100 text-slate-600 font-semibold rounded-2xl hover:bg-slate-200 transition-all">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-10 right-10 translate-y-20 opacity-0 transition-all duration-500 z-[200]">
+      <div class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4">
+        <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+        <div>
+          <p id="toastTitle" class="font-bold text-sm"></p>
+          <p id="toastMsg" class="text-slate-400 text-xs"></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:7039/api/properties";
+      let properties = [];
+
+      // Initialize Lucide
+      lucide.createIcons();
+
+      async function fetchProperties() {
+        showLoader(true);
+        try {
+          const response = await fetch(API_BASE);
+          const data = await response.json();
+          if (data.success) {
+            properties = data.data;
+            renderProperties();
+          }
+        } catch (error) {
+          showToast("Error", "Failed to load properties", "error");
+        } finally {
+          showLoader(false);
+        }
+      }
+
+      function renderProperties() {
+        const grid = document.getElementById("propertiesGrid");
+        const empty = document.getElementById("emptyState");
+        grid.innerHTML = "";
+
+        if (properties.length === 0) {
+          empty.classList.remove("hidden");
+          return;
+        }
+        empty.classList.add("hidden");
+
+        properties.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1";
+          
+          const statusColors = {
+            available: "bg-emerald-100 text-emerald-700",
+            sold: "bg-red-100 text-red-700",
+            rented: "bg-blue-100 text-blue-700",
+            under_construction: "bg-amber-100 text-amber-700"
+          };
+
+          card.innerHTML = `
+            <div class="relative h-64 overflow-hidden">
+              <img src="${p.images[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1000'}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              <div class="absolute top-4 left-4">
+                <span class="px-3 py-1 rounded-lg text-xs font-bold uppercase ${statusColors[p.status] || 'bg-slate-100 text-slate-700'}">
+                  ${p.status.replace('_', ' ')}
+                </span>
+              </div>
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                <button onclick="viewProperty('${p.id}')" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-700 shadow-lg hover:scale-110 transition-transform">
+                  <i data-lucide="eye" class="w-5 h-5"></i>
+                </button>
+                <button onclick="editProperty('${p.id}')" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-indigo-600 shadow-lg hover:scale-110 transition-transform">
+                  <i data-lucide="edit-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="deleteProperty('${p.id}')" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-red-600 shadow-lg hover:scale-110 transition-transform">
+                  <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-xl font-bold text-slate-800 line-clamp-1">${p.title}</h4>
+                <p class="text-lg font-bold text-indigo-600">$${p.price.toLocaleString()}</p>
+              </div>
+              <div class="flex items-center gap-2 text-slate-500 text-sm mb-4">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                <span>${p.location}</span>
+              </div>
+              <div class="flex items-center justify-between pt-4 border-t border-slate-50 text-slate-600 text-sm">
+                <div class="flex items-center gap-1">
+                  <i data-lucide="maximize" class="w-4 h-4 text-slate-400"></i>
+                  <span>${p.area} sqft</span>
+                </div>
+                <div class="flex items-center gap-1 uppercase font-bold text-xs tracking-wider text-slate-400">
+                  <i data-lucide="home" class="w-4 h-4"></i>
+                  <span>${p.type}</span>
+                </div>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        lucide.createIcons();
+        updateStats();
+      }
+
+      function updateStats() {
+        document.getElementById("totalPropertiesCount").innerText = properties.length;
+        document.getElementById("availableCount").innerText = properties.filter(p => p.status === 'available').length;
+        document.getElementById("pendingCount").innerText = properties.filter(p => ['under_construction', 'rented'].includes(p.status)).length;
+      }
+
+      // Modal Handlers
+      function openPropertyModal(property = null) {
+        const modal = document.getElementById("propertyModal");
+        const form = document.getElementById("propertyForm");
+        modal.classList.remove("opacity-0", "pointer-events-none");
+        modal.querySelector("div").classList.remove("scale-95");
+
+        if (property) {
+          document.getElementById("modalTitle").innerText = "Edit Property";
+          document.getElementById("propertyId").value = property.id;
+          document.getElementById("pTitle").value = property.title;
+          document.getElementById("pPrice").value = property.price;
+          document.getElementById("pDescription").value = property.description;
+          document.getElementById("pLocation").value = property.location;
+          document.getElementById("pType").value = property.type;
+          document.getElementById("pArea").value = property.area;
+          document.getElementById("pStatus").value = property.status;
+          document.getElementById("pImage").value = property.images[0] || "";
+        } else {
+          document.getElementById("modalTitle").innerText = "Add New Property";
+          form.reset();
+          document.getElementById("propertyId").value = "";
+        }
+      }
+
+      function closePropertyModal() {
+        const modal = document.getElementById("propertyModal");
+        modal.classList.add("opacity-0", "pointer-events-none");
+        modal.querySelector("div").classList.add("scale-95");
+      }
+
+      async function viewProperty(id) {
+        try {
+          const res = await fetch(`${API_BASE}/${id}`);
+          const data = await res.json();
+
+          if (!data.success || !data.data) {
+            showToast("Error", data.message || "Property details not found", "error");
+            return;
+          }
+
+          const property = data.data;
+          const statusColors = {
+            available: "bg-emerald-100 text-emerald-700",
+            sold: "bg-red-100 text-red-700",
+            rented: "bg-blue-100 text-blue-700",
+            under_construction: "bg-amber-100 text-amber-700"
+          };
+
+          const formattedStatus = property.status.replaceAll("_", " ");
+          document.getElementById("viewPropertyImage").src = property.images[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1000";
+          document.getElementById("viewPropertyImage").alt = property.title;
+          document.getElementById("viewPropertyTitle").innerText = property.title;
+          document.getElementById("viewPropertyLocation").innerText = property.location;
+          document.getElementById("viewPropertyPrice").innerText = `$${property.price.toLocaleString()}`;
+          document.getElementById("viewPropertyType").innerText = property.type;
+          document.getElementById("viewPropertyArea").innerText = `${property.area} sqft`;
+          document.getElementById("viewPropertyDescription").innerText = property.description;
+          document.getElementById("viewPropertyStatusText").innerText = formattedStatus;
+
+          const statusBadge = document.getElementById("viewPropertyStatus");
+          statusBadge.innerText = formattedStatus;
+          statusBadge.className = `px-3 py-1 rounded-lg text-xs font-bold uppercase ${statusColors[property.status] || "bg-slate-100 text-slate-700"}`;
+
+          const modal = document.getElementById("viewPropertyModal");
+          modal.classList.remove("opacity-0", "pointer-events-none");
+          modal.querySelector("div").classList.remove("scale-95");
+          lucide.createIcons();
+        } catch (error) {
+          showToast("Error", "Failed to load property details", "error");
+        }
+      }
+
+      function closeViewPropertyModal() {
+        const modal = document.getElementById("viewPropertyModal");
+        modal.classList.add("opacity-0", "pointer-events-none");
+        modal.querySelector("div").classList.add("scale-95");
+      }
+
+      async function saveProperty(e) {
+        e.preventDefault();
+        const id = document.getElementById("propertyId").value;
+        const payload = {
+          title: document.getElementById("pTitle").value,
+          price: Number(document.getElementById("pPrice").value),
+          description: document.getElementById("pDescription").value,
+          location: document.getElementById("pLocation").value,
+          type: document.getElementById("pType").value,
+          area: Number(document.getElementById("pArea").value),
+          status: document.getElementById("pStatus").value,
+          images: [document.getElementById("pImage").value]
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `${API_BASE}/${id}` : API_BASE;
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast("Success", id ? "Property updated" : "Property added", "success");
+            closePropertyModal();
+            fetchProperties();
+          } else {
+            showToast("Error", data.message, "error");
+          }
+        } catch (error) {
+          showToast("Error", "Connection failed", "error");
+        }
+      }
+
+      async function deleteProperty(id) {
+        if (!confirm("Delete this property?")) return;
+        try {
+          const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+          const data = await res.json();
+          if (data.success) {
+            showToast("Deleted", "Property removed", "success");
+            fetchProperties();
+          }
+        } catch (error) {
+          showToast("Error", "Delete failed", "error");
+        }
+      }
+
+      function editProperty(id) {
+        const p = properties.find(item => item.id === id);
+        if (p) openPropertyModal(p);
+      }
+
+      function showLoader(show) {
+        document.getElementById("loader").classList.toggle("hidden", !show);
+      }
+
+      function showToast(title, msg, type) {
+        const toast = document.getElementById("toast");
+        const icon = document.getElementById("toastIcon");
+        icon.innerHTML = type === "success" 
+          ? '<i data-lucide="check" class="w-5 h-5"></i>' 
+          : '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+        icon.className = `w-8 h-8 rounded-full flex items-center justify-center ${type === "success" ? "bg-emerald-500" : "bg-red-500"}`;
+        document.getElementById("toastTitle").innerText = title;
+        document.getElementById("toastMsg").innerText = msg;
+        lucide.createIcons();
+        toast.classList.remove("translate-y-20", "opacity-0");
+        setTimeout(() => toast.classList.add("translate-y-20", "opacity-0"), 3000);
+      }
+
+      document.getElementById("propertyForm").addEventListener("submit", saveProperty);
+      window.onload = fetchProperties;
+    </script>
+  </body>
+</html>
